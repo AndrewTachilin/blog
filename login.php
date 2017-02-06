@@ -1,23 +1,52 @@
 <?php
-    session_start();
-    require "functions.php";
+ob_start();
+session_start();
 
-    if(!empty($_POST)) {
-        if(isset($_POST['email']) && isset($_POST['password'])) {
-            $user = checkUser(
-                $_POST['email'], $_POST['password']
-            );
-            if($user) {
-                $_SESSION['user'] = true;
-                $_SESSION['firstName'] = $user['firstName'];
-                $_SESSION['lastName'] = $user['lastName'];
-                header("Location: index.php");
+require_once 'header.php';
+
+require 'database.php';
+$username = "root";
+$password = "";
+$email = $_POST['email'];
+$pass = $_POST['password'];
+$_SESSION['email']=$email;
+if(isset($_POST['submitlogin'])) {
+    if (isset($email) && isset($pass) && $email != "" && $pass != "") {
+        try {
+            $sql = "select email, firstname,password from user";
+            $dbh = new PDO('mysql:host=localhost;dbname=blog', $username, $password);
+            $sth = $dbh->prepare($sql);
+            $sth->execute(array(
+                ':pass' => $pass,
+                ':email' => $email
+            ));
+            $sth = $dbh->query($sql);
+            $rows = $sth->fetchAll();
+            foreach ($rows as $row) {
+                $userlogin = $row[0];
+                $userfirstname = $row[1];
+                $userpassword = $row[2];
+                if (($email == $userlogin) and ($pass == $userpassword)) {
+                    $indexphp = 'index.php';
+                    $_SESSION['login'] = true;
+                    $_SESSION['email'] = $userlogin;
+                    $_SESSION['name'] = $userfirstname;
+
+                    header('Location:'.$indexphp);
+
+                } else $error_login = "Поля не могут быть пустыми";
+
             }
+
+
+        } catch
+        (PDOException $e) {
+            print "Error!: " . $e->getMessage() . "<br/>";
         }
+    } else {
+        echo "введите пароль или логин";
     }
-
-
-    require "header.php";
+}
 
 
 ?>
@@ -40,7 +69,7 @@
                         <input name="password" type="password" class="form-control" />
                     </div>
                     <div class="form-group">
-                        <input type="submit" class="btn btn-primary form-control" />
+                        <input type="submit" name="submitlogin" class="btn btn-primary form-control" />
                     </div>
                 </form>
             </div>
@@ -50,5 +79,5 @@
 </div>
 
 <?php
-    require "footer.php";
-?>
+ob_end_flush();
+

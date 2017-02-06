@@ -1,40 +1,14 @@
 <?php
-    session_start();
+session_start();
+ob_start();
+require "header.php";
+require "database.php";
 
-    require "functions.php";
 
-    if(isset($_SESSION['user'])) {
-        header("Location: index.php");
-    } else {
 
-        if (!empty($_POST)) {
-            if (
-                !empty($_POST['email']) &&
-                !empty($_POST['firstName']) &&
-                !empty($_POST['lastName']) &&
-                !empty($_POST['password']) &&
-                !empty($_POST['passwordConfirm']) &&
-                $_POST['password'] == $_POST['passwordConfirm']
-            ) {
-                if (!userExist($_POST['email'])) {
-                    if (addUser($_POST['email'],
-                        $_POST['firstName'],
-                        $_POST['lastName'],
-                        $_POST['password']
-                    )) {
 
-                        $_SESSION['user'] = true;
-                        $_SESSION['firstName'] = $_POST['firstName'];
-                        $_SESSION['lastName'] = $_POST['lastName'];
-                        header("Location: index.php");
-                    }
-                }
-            }
 
-        }
-
-        require "header.php";
-        ?>
+     ?>
 
         <div class="container">
 
@@ -42,6 +16,8 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h2>Sign up</h2>
+
+
                     </div>
                     <div class="panel-body">
                         <form method="POST">
@@ -50,32 +26,33 @@
                                 <input name="email" type="email" class="form-control"/>
                             </div>
                             <div class="form-group">
-                                <label>First Name</label>
+                                <label>Name</label>
                                 <input name="firstName" type="text" class="form-control"/>
                             </div>
-                            <div class="form-group">
-                                <label>Last Name</label>
-                                <input name="lastName" type="text" class="form-control"/>
-                            </div>
-                            <div class="form-group">
+                           <div class="form-group">
                                 <label>Password</label>
                                 <input name="password" type="password" class="form-control"/>
                             </div>
                             <div class="form-group">
-                                <label>Confirm Password</label>
-                                <input name="passwordConfirm" type="password" class="form-control"/>
-                            </div>
-                            <div class="form-group">
-                                <input type="submit" class="btn btn-primary form-control"/>
-                            </div>
+                                <input type="submit" name="submitSign" class="btn btn-primary form-control"/>
+                        </div>
                         </form>
                     </div>
                 </div>
             </div>
 
         </div>
-        <?php
-        require "footer.php";
+<?php
 
-    }
+if(isset($_POST['submitSign'])){
+    $indexphp = 'index.php';
+    $_SESSION['email']= $_POST['email'];
+    $_SESSION['name']= $_POST['firstName'];
+
+    header('Location:'.' index.php');
+    exit();
+
+}
+ob_end_flush();
 ?>
+
